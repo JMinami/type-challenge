@@ -13,6 +13,5 @@ namespace Myreadonly {
     description: "foobar"
   }
 
-  todo.title = "hello"
-
+  console.log(todo)
 }
