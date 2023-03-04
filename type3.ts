@@ -8,19 +8,49 @@ namespace Type3 {
     array: T[];
     type: S;
   }
-  type SafeAnyArray = SafeArray<any>
+  /* 使い方
+    1. currentの値チェック
+    2. valueの値チェック
+    3. 1と2が正の場合、currentにvalueを追加
+  */
+  type CurrentTypeCheckAndSet<Current, Value = Current> = {
+    checkCurrent: (param: unknown) => param is Current
+    checkValue: (param: unknown) => param is Value
+    setValue: (current: Current, next: Value) => Current
+  }
+  
+  type SafeArrayType<WT, T> = {
+    isArrayTypeFunc: (param: unknown) => param is WT,
+    initArrayFunc: (param: T[]) => void;
+    isElementTypeFunc: (param: unknown) => param is T,
+  }
+  const safeCategories: SafeArrayType<SafeCategories, CategoryID> = {
+    isArrayTypeFunc: isSafeCategories,
+    initArrayFunc: initSafeCategories,
+    isElementTypeFunc: isCategory,
+  }
+  const safeBrands: SafeArrayType<SafeBrands, BrandID> = {
+    isArrayTypeFunc: isSafeBrands,
+    initArrayFunc: initSafeBrands,
+    isElementTypeFunc: isBrand,
+  }
+  const safeStrings: SafeArrayType<SafeStrings, string> = {
+    isArrayTypeFunc: isSafeStrings,
+    initArrayFunc: initSafeStrings,
+    isElementTypeFunc: isString,
+  }
 
   // カテゴリー配列のwrapper型
   type SafeCategories = SafeArray<CategoryID, "category">
   type CategoryID = `${number}`
-  const initSafeCategories = (categories: CategoryID[]): SafeCategories => ({array: categories, type: "category"})
-  const isSafeCategories = (param: unknown): param is SafeCategories => {
+  function initSafeCategories(categories: CategoryID[]): SafeCategories {return {array: categories, type: "category"}}
+  function isSafeCategories(param: unknown): param is SafeCategories{
     if (param && typeof param == "object") {
       if ("array" in param && "type" in param )return param.type === "category"
     }
     return false
   }
-  const isCategory = (param: unknown): param is CategoryID => {
+  function isCategory(param: unknown): param is CategoryID{
     if (param && typeof param == "string") return !isNaN(Number(param))
     return false
   }
@@ -28,26 +58,28 @@ namespace Type3 {
   // ブランド配列のwrapper型
   type SafeBrands = SafeArray<BrandID, "brand">
   type BrandID = `${number}`
-  const initSafeBrands = (brands: BrandID[]): SafeBrands => ({array: brands, type: "brand"})
-  const isSafeBrands = (param: unknown): param is SafeBrands => {
+  function initSafeBrands(brands: BrandID[]): SafeBrands{return {array: brands, type: "brand"}}
+  function isSafeBrands(param: unknown): param is SafeBrands {
     if (param && typeof param == "object") {
       if ("array" in param && "type" in param) return param.type === "brand"
     }
     return false
   }
-  const isBrand = (param: unknown): param is BrandID => {
+  function isBrand(param: unknown): param is BrandID {
     if (param && typeof param == "string") return !isNaN(Number(param))
     return false
   }
+
   // 文字配列のwrapper型
   type SafeStrings = SafeArray<string, "string">
-  const initSafeStrings = (strs: string[]):SafeStrings => ({array: strs, type: "string"})
-  const isSafeStrings = (param: unknown): param is SafeStrings => {
+  function initSafeStrings(strs: string[]):SafeStrings{return{array: strs, type: "string"}}
+  function isSafeStrings(param: unknown): param is SafeStrings {
     if (param && typeof param == "object") {
       if ("array" in param && "type" in param )return param.type === "string"
     }
     return false
   }
+  function isString(param: unknown): param is string {return typeof param === "string"}
 
   // 検索タイプ
   const searchTypes = ["default", "category", "brand", "new"] as const;
@@ -80,6 +112,7 @@ namespace Type3 {
     }
     return false
   }
+  const safeArrayTypes = [safeCategories, safeBrands, safeStrings]
 
   // 検索キーを安全に扱うための型
   type SafeSearchParams = {
@@ -103,10 +136,12 @@ namespace Type3 {
     arg in params;
 
   // safe型から通常の型へ変換
+  type SafeAnyArray = SafeArray<any>
   type MakeSafeToSearchParams<T = SafeSearchParams> = {
     [Key in keyof T]: T[Key] extends SafeAnyArray ? T[Key]["array"] : T[Key]
   }
 
+  // 検索条件型
   type SearchParams = MakeSafeToSearchParams
   let params: SearchParams = {
     "search-type": defaultSearchtype,
