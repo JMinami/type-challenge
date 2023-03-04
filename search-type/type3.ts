@@ -140,7 +140,7 @@ namespace Type3 {
 
     /*
       同じことを繰り返しているので
-      ↓のようにループでやろうとすると型ガードが効かなくなるので断念
+      ↓のようにループでやろうとしたが型ガードが効かなくなるので断念
 
       type Operator {
         isCurrentGuard: (param) param is Current
