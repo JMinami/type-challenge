@@ -14,9 +14,9 @@ namespace Type3 {
     3. 1と2が正の場合、currentにvalueを追加
   */
   type CurrentTypeCheckAndSet<Current, Value = Current> = {
-    checkCurrent: (param: unknown) => param is Current
-    checkValue: (param: unknown) => param is Value
-    setValue: (current: Current, next: Value) => Current
+    isCurrentType: (param: unknown) => param is Current
+    isValueType: (param: unknown) => param is Value
+    setValue: (current: Current, value: Value) => Current
   }
   
   type SafeArrayType<WT, T> = {
@@ -112,7 +112,6 @@ namespace Type3 {
     }
     return false
   }
-  const safeArrayTypes = [safeCategories, safeBrands, safeStrings]
 
   // 検索キーを安全に扱うための型
   type SafeSearchParams = {
